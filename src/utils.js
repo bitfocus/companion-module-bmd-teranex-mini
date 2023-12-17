@@ -12,7 +12,7 @@ module.exports = {
 		}
 
 		if (self.config.port === undefined) {
-			self.config.port = 9800
+			self.config.port = 9995
 		}
 
 		self.has_data = false
