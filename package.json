@@ -1,5 +1,5 @@
 {
-	"name": "bmd-teranex",
+	"name": "bmd-teranex-mini",
 	"version": "2.0.0",
 	"main": "index.js",
 	"scripts": {
@@ -8,7 +8,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-bmd-teranex.git"
+		"url": "git+https://github.com/bitfocus/companion-module-bmd-teranex-mini.git"
 	},
 	"license": "MIT",
 	"dependencies": {

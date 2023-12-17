@@ -1,12 +1,12 @@
 {
-	"id": "bmd-teranex",
-	"name": "bmd-teranex",
-	"shortname": "teranex",
+	"id": "bmd-teranex-mini",
+	"name": "bmd-teranex-mini",
+	"shortname": "teranex-mini",
 	"description": "",
 	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-bmd-teranex.git",
-	"bugs": "https://github.com/bitfocus/companion-module-bmd-teranex/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-bmd-teranex-mini.git",
+	"bugs": "https://github.com/bitfocus/companion-module-bmd-teranex-mini/issues",
 	"maintainers": [
 		{
 			"name": "Joseph Adams",
@@ -25,6 +25,6 @@
 		"entrypoint": "../index.js"
 	},
 	"manufacturer": "Blackmagic Design",
-	"products": ["Teranex"],
+	"products": ["Teranex Mini"],
 	"keywords": ["Image Processing"]
 }

@@ -1,6 +1,6 @@
-## Blackmagic Design Teranex
+## Blackmagic Design Teranex Mini
 
-This module will connect to any Blackmagic Design Teranex device. Not all settings work with every model of Teranex. Where necessary, supported devices are indicated in the options.
+This module will connect to some Blackmagic Design Teranex Mini devices. Not all settings work with every model of Teranex Mini. Where necessary, supported devices are indicated in the options.
 
 **Actions**
 

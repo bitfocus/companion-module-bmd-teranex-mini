@@ -1,4 +1,4 @@
-// BlackMagic Design Teranex
+// BlackMagic Design Teranex Mini
 
 const { InstanceBase, InstanceStatus, runEntrypoint } = require('@companion-module/base')
 const UpgradeScripts = require('./src/upgrades')
@@ -12,7 +12,7 @@ const presets = require('./src/presets')
 const utils = require('./src/utils')
 const choices = require('./src/choices')
 
-class teranexInstance extends InstanceBase {
+class teranexMiniInstance extends InstanceBase {
 	constructor(internal) {
 		super(internal)
 
@@ -86,4 +86,4 @@ class teranexInstance extends InstanceBase {
 	}
 }
 
-runEntrypoint(teranexInstance, UpgradeScripts)
+runEntrypoint(teranexMiniInstance, UpgradeScripts)
