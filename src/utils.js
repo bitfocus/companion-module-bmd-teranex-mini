@@ -68,13 +68,13 @@ module.exports = {
 						obj[info.shift()] = info.join(':')
 					})
 
-					self.teranexInformation(cmd, obj)
+					self.teranexMiniInformation(cmd, obj)
 
 					self.stash = []
 					self.command = null
 				} else {
 					if (self.config.debug) {
-						self.log('debug', 'Unexpected response from Teranex: ' + line)
+						self.log('debug', 'Unexpected response from Teranex Mini: ' + line)
 					}
 				}
 			})
@@ -94,7 +94,7 @@ module.exports = {
 		}
 	},
 
-	teranexInformation: function (key, data) {
+	teranexMiniInformation: function (key, data) {
 		let self = this
 
 		if (key == 'VIDEO INPUT') {

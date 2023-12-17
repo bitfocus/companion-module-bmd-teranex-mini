@@ -8,7 +8,7 @@ module.exports = {
 				id: 'info',
 				width: 12,
 				label: 'Information',
-				value: 'This module will connect to a Blackmagic Design Teranex Device.',
+				value: 'This module will connect to a Blackmagic Design Teranex Mini Device.',
 			},
 			{
 				type: 'textinput',
