@@ -1,7 +1,21 @@
 const { TCPHelper, InstanceStatus } = require('@companion-module/base')
 
+const cloneDeep = require('clone-deep')
+
 module.exports = {
-	parseIpAndPort: function() {
+	commandValueToKey: function (text) {
+		let self = this
+
+		self.log('debug', 'Started with: |' + text + '|')
+		let newText = text
+		newText = newText.replaceAll(' ', '_').toLowerCase()
+		newText = newText.replaceAll('/', '_').toLowerCase()
+		newText = newText.replaceAll('-', '_').toLowerCase()
+		self.log('debug', 'Ended with: |' + newText + '|')
+		return newText
+	},
+
+	parseIpAndPort: function () {
 		let self = this
 		// TODO: Switch to Regex.IP when we can convert that into a RegExp object... (it will need some processing)
 		const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
@@ -29,6 +43,20 @@ module.exports = {
 	initTCP: function () {
 		let self = this
 		let receivebuffer = ''
+
+		self.inited_model = false
+		self.variables = []
+		self.variableValues = {}
+		self.variables.push({ name: 'Connection Status', variableId: 'connect_status' })
+		// Make the connect status variable immediately available...
+		self.setVariableDefinitions(self.variables)
+
+		self.actions = {}
+
+		self.feedbacks = {}
+
+		self.presets = {}
+
 		let target = self.parseIpAndPort()
 
 		if (self.socket !== undefined) {
@@ -91,10 +119,27 @@ module.exports = {
 
 					let obj = {}
 					self.stash.forEach(function (val) {
-						let info = val.split(/\s*:\s*/)
+						// Deal with some inconsistent colon placement in the BMD protocol
+						let fixedVal = val
+						fixedVal = fixedVal.replace('Gain: XLR Analog Left', 'Gain XLR Analog Left:')
+						fixedVal = fixedVal.replace('Gain: XLR Analog Right', 'Gain XLR Analog Right:')
+						fixedVal = fixedVal.replace('Assign: XLR Analog Stereo SDI Stereo', 'Assign XLR Analog Stereo SDI Stereo:')
+						fixedVal = fixedVal.replace(
+							'Routing: XLR Analog Stereo SDI Stereo',
+							'Routing XLR Analog Stereo SDI Stereo:'
+						)
+						fixedVal = fixedVal.replace('Gain: XLR AES/EBU Stereo 1-2', 'Gain XLR AES/EBU Stereo 1-2:')
+						fixedVal = fixedVal.replace('Gain: XLR AES/EBU Stereo 3-4', 'Gain XLR AES/EBU Stereo 3-4:')
+						fixedVal = fixedVal.replace('Assign: XLR AES/EBU Quad SDI Quad', 'Assign XLR AES/EBU Quad SDI Quad:')
+						fixedVal = fixedVal.replace('Routing: XLR AES/EBU Quad SDI Quad', 'Routing XLR AES/EBU Quad SDI Quad:')
+						fixedVal = fixedVal.replace('Assign: HDMI Oct SDI Oct', 'Assign HDMI Oct SDI Oct:')
+						fixedVal = fixedVal.replace('Routing: HDMI Oct SDI Oct', 'Routing HDMI Oct SDI Oct:')
+
+						let info = fixedVal.split(/\s*:\s*/)
 						obj[info.shift()] = info.join(':')
 					})
 
+					self.log('debug', JSON.stringify(obj))
 					self.teranexMiniInformation(cmd, obj)
 
 					self.stash = []
@@ -106,7 +151,7 @@ module.exports = {
 				}
 			})
 		} else {
-			self.log('error', 'Didn\'t get a target to connect to')
+			self.log('error', "Didn't get a target to connect to")
 			self.updateStatus(InstanceStatus.Disconnected)
 		}
 	},
@@ -127,145 +172,124 @@ module.exports = {
 	teranexMiniInformation: function (key, data) {
 		let self = this
 
-		if (key == 'VIDEO INPUT') {
-			if (self.config.debug) {
-				self.log('debug', 'VIDEO INPUT DATA: ' + data)
-			}
+		let processedCommand = self.commandValueToKey(key)
+		self.log('debug', 'Got key: ' + processedCommand)
 
-			if (data['Video source'] !== undefined) {
-				self.video_source = data['Video source']
-			}
+		let model = self.getModel()
+		self.log('debug', 'Model data: ' + JSON.stringify(model))
 
-			if (data['Audio source'] !== undefined) {
-				self.audio_source = data['Audio source']
-			}
+		if (processedCommand in model) {
+			self.log('debug', 'Found model data for: ' + processedCommand)
+			self.log('debug', JSON.stringify(model[processedCommand]))
+			for (const [k, v] of Object.entries(data)) {
+				self.log('debug', `${k}: ${v}`)
+				let processedK = self.commandValueToKey(k)
+				let commandKey = processedCommand + '-' + processedK
+				self.log('debug', 'Generated commandKey: ' + commandKey)
+				self.data[commandKey] = v
+				if (processedK in model[processedCommand]) {
+					self.log('info', 'Found model data for: ' + processedCommand + ' - ' + processedK)
+					self.log('debug', JSON.stringify(model[processedCommand][processedK]))
 
-			if (data['Video mode'] !== undefined) {
-				self.input_format = data['Video mode']
-			}
+					// Init the model from the live data if we haven't already done so
+					if (!self.inited_model) {
+						if ('actions' in model[processedCommand][processedK]) {
+							model[processedCommand][processedK]['actions'].forEach((action, i) => {
+								let id = commandKey
+								if (i > 0) {
+									id += '-' + i
+								}
+								if (!('options' in action) && 'options' in model[processedCommand][processedK]) {
+									action['options'] = model[processedCommand][processedK]['options']
+								}
+								self.actions[id] = action
+							})
+						}
 
-			if (data['Signal present'] !== undefined) {
-				self.signal_present = data['Signal present']
+						if ('feedbacks' in model[processedCommand][processedK]) {
+							model[processedCommand][processedK]['feedbacks'].forEach((feedback, i) => {
+								let id = commandKey
+								if (i > 0) {
+									id += '-' + i
+								}
+								if (!('options' in feedback) && 'options' in model[processedCommand][processedK]) {
+									feedback['options'] = model[processedCommand][processedK]['options']
+								}
+								self.feedbacks[id] = feedback
+							})
+						}
+
+						if ('presets' in model[processedCommand][processedK]) {
+							model[processedCommand][processedK]['presets'].forEach((preset, i) => {
+								let id = commandKey
+								if (i > 0) {
+									id += '-' + i
+								}
+								if (
+									'options' in model[processedCommand][processedK] &&
+									model[processedCommand][processedK]['options'].length > 0
+								) {
+									if (
+										'choices' in model[processedCommand][processedK]['options'][0] &&
+										model[processedCommand][processedK]['options'][0]['choices'].length > 0
+									) {
+										let option = model[processedCommand][processedK]['options'][0]
+										option['choices'].forEach((choice, j) => {
+											let presetId = id + '-' + choice['id']
+											self.log('debug', 'Looking at choice ' + choice['label'])
+											self.presets[presetId] = cloneDeep(preset)
+											self.presets[presetId]['name'] += choice['label']
+											self.presets[presetId]['style']['text'] = choice['label']
+											self.presets[presetId]['steps'][0]['down'][0]['options'][option['id']] = choice['id']
+											self.presets[presetId]['feedbacks'][0]['options'][option['id']] = choice['id']
+										})
+									}
+								}
+							})
+						}
+					}
+
+					if ('variables' in model[processedCommand][processedK]) {
+						model[processedCommand][processedK]['variables'].forEach((variable, i) => {
+							let id = commandKey
+							if (i > 0) {
+								id += '-' + i
+							}
+
+							// Init the variables from the live data if we haven't already done so
+							if (!self.inited_model) {
+								self.variables.push({ name: variable['name'], variableId: id })
+							}
+
+							// TODO(Peter): Should we parse some of these values as int/bool etc?
+							self.variableValues[id] = v
+						})
+					}
+				} else {
+					self.log('warn', 'Failed to find model data for: ' + processedK)
+				}
 			}
+		} else {
+			self.log('warn', 'Failed to find model data for: ' + processedCommand)
 		}
 
-		if (key == 'VIDEO OUTPUT') {
-			if (self.config.debug) {
-				self.log('debug', 'VIDEO OUTPUT DATA: ' + data)
-			}
-
-			if (data['Video mode'] !== undefined) {
-				self.output_format = data['Video mode']
-			}
+		if (key == 'END PRELUDE') {
+			self.setActionDefinitions(self.actions)
+			self.setFeedbackDefinitions(self.feedbacks)
+			self.setPresetDefinitions(self.presets)
+			self.setVariableDefinitions(self.variables)
+			self.log('info', 'Inited model data')
+			self.inited_model = true
+			self.log('debug', 'Local data: ' + JSON.stringify(self.data))
 		}
 
-		if (key == 'VIDEO ADJUST') {
-			if (self.config.debug) {
-				self.log('debug', 'VIDEO ADJUST DATA: ' + data)
-			}
+		if (self.inited_model) {
+			// Update variable info immediately once the variables themselves have been set
+			// TODO(Peter): We can probably empty the variables after this so we only re-send the changed ones next time
+			// As long as the feedbacks use the internal data model not the variables
+			self.setVariableValues(self.variableValues)
 
-			if (data['Red'] !== undefined) {
-				self.data.video_adjust.red = parseInt(data['Red'])
-			}
-
-			if (data['Green'] !== undefined) {
-				self.data.video_adjust.green = parseInt(data['Green'])
-			}
-
-			if (data['Blue'] !== undefined) {
-				self.data.video_adjust.blue = parseInt(data['Blue'])
-			}
-
-			if (data['Luma low'] !== undefined) {
-				self.data.video_adjust.luma_low = parseInt(data['Luma low'])
-			}
-
-			if (data['Luma high'] !== undefined) {
-				self.data.video_adjust.luma_high = parseInt(data['Luma high'])
-			}
-
-			if (data['Chroma low'] !== undefined) {
-				self.data.video_adjust.chroma_low = parseInt(data['Chroma low'])
-			}
-
-			if (data['Chroma high'] !== undefined) {
-				self.data.video_adjust.chroma_high = parseInt(data['Chroma high'])
-			}
-
-			if (data['Aspect fill luma'] !== undefined) {
-				self.data.video_adjust.aspect_fill_luma = parseInt(data['Aspect fill luma'])
-			}
-
-			if (data['Aspect fill Cb'] !== undefined) {
-				self.data.video_adjust.aspect_fill_cb = parseInt(data['Aspect fill Cb'])
-			}
-
-			if (data['Aspect fill Cr'] !== undefined) {
-				self.data.video_adjust.aspect_fill_cr = parseInt(data['Aspect fill Cr'])
-			}
+			self.checkFeedbacks()
 		}
-
-		if (key == 'VIDEO PROC AMP') {
-			if (self.config.debug) {
-				self.log('debug', 'VIDEO PROC AMP DATA: ' + data)
-			}
-
-			if (data['Gain'] !== undefined) {
-				self.data.video_procamp.gain = parseInt(data['Gain'])
-			}
-
-			if (data['Black'] !== undefined) {
-				self.data.video_procamp.black = parseInt(data['Black'])
-			}
-
-			if (data['Saturation'] !== undefined) {
-				self.data.video_procamp.saturation = parseInt(data['Saturation'])
-			}
-
-			if (data['Hue'] !== undefined) {
-				self.data.video_procamp.hue = parseInt(data['Hue'])
-			}
-
-			if (data['RY'] !== undefined) {
-				self.data.video_procamp.ry = parseInt(data['RY'])
-			}
-
-			if (data['BY'] !== undefined) {
-				self.data.video_procamp.by = parseInt(data['BY'])
-			}
-
-			if (data['Sharp'] !== undefined) {
-				self.data.video_procamp.sharp = parseInt(data['Sharp'])
-			}
-		}
-
-		if (key == 'GENLOCK') {
-			if (self.config.debug) {
-				self.log('debug', 'GENLOCK DATA: ' + data)
-			}
-
-			if (data['Gen reference'] !== undefined) {
-				self.data.genlock.reference = data['Gen reference']
-			}
-
-			if (data['Line offset'] !== undefined) {
-				self.data.genlock.lineoffset = parseInt(data['Line offset'])
-			}
-
-			if (data['Pixel offset'] !== undefined) {
-				self.data.genlock.pixeloffset = parseInt(data['Pixel offset'])
-			}
-
-			if (data['Signal locked'] !== undefined) {
-				self.data.genlock.signallocked = data['Signal locked']
-			}
-
-			if (data['Type'] !== undefined) {
-				self.data.genlock.type = data['Type']
-			}
-		}
-
-		self.checkFeedbacks()
-		self.checkVariables()
 	},
 }

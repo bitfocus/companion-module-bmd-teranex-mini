@@ -12,7 +12,8 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@companion-module/base": "~1.6.0"
+		"@companion-module/base": "~1.6.0",
+		"clone-deep": "~4.0.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^1.4.0"
