@@ -1,0 +1,22 @@
+{
+	"name": "bmd-teranex-mini",
+	"version": "2.0.0",
+	"main": "index.js",
+	"scripts": {
+		"format": "prettier -w .",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-bmd-teranex-mini.git"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"@companion-module/base": "~1.6.0",
+		"clone-deep": "~4.0.1"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^1.4.0"
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json"
+}

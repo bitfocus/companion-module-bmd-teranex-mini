@@ -1,0 +1,40 @@
+{
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+	"id": "bmd-teranex-mini",
+	"name": "bmd-teranex-mini",
+	"shortname": "teranex-mini",
+	"description": "",
+	"version": "0.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-bmd-teranex-mini.git",
+	"bugs": "https://github.com/bitfocus/companion-module-bmd-teranex-mini/issues",
+	"maintainers": [
+		{
+			"name": "Joseph Adams",
+			"email": "josephdadams@gmail.com"
+		},
+		{
+			"name": "Håkon Nessjøen",
+			"email": "haakon@bitfocus.io"
+		}
+	],
+	"legacyIds": [],
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../index.js"
+	},
+	"manufacturer": "Blackmagic Design",
+	"products": ["Teranex Mini"],
+	"keywords": ["Image Processing"],
+	"bonjourQueries": {
+		"bonjourHost": {
+			"type": "blackmagic",
+			"protocol": "tcp",
+			"txt": {
+				"class": "TeranexMini"
+			}
+		}
+	}
+}
