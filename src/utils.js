@@ -124,13 +124,13 @@ module.exports = {
 						fixedVal = fixedVal.replace('Gain: XLR Analog Left', 'Gain XLR Analog Left:')
 						fixedVal = fixedVal.replace('Gain: XLR Analog Right', 'Gain XLR Analog Right:')
 						fixedVal = fixedVal.replace('Assign: XLR Analog Stereo SDI Stereo', 'Assign XLR Analog Stereo SDI Stereo:')
-						fixedVal = fixedVal.replace(
-							'Routing: XLR Analog Stereo SDI Stereo',
-							'Routing XLR Analog Stereo SDI Stereo:'
-						)
+						fixedVal = fixedVal.replace('Bypass: XLR Analog Left', 'Bypass XLR Analog Left:')
+						fixedVal = fixedVal.replace('Bypass: XLR Analog Right', 'Bypass XLR Analog Right:')
 						fixedVal = fixedVal.replace('Gain: XLR AES/EBU Stereo 1-2', 'Gain XLR AES/EBU Stereo 1-2:')
 						fixedVal = fixedVal.replace('Gain: XLR AES/EBU Stereo 3-4', 'Gain XLR AES/EBU Stereo 3-4:')
 						fixedVal = fixedVal.replace('Assign: XLR AES/EBU Quad SDI Quad', 'Assign XLR AES/EBU Quad SDI Quad:')
+						fixedVal = fixedVal.replace('Bypass: XLR AES/EBU Stereo 1-2', 'Bypass XLR AES/EBU Stereo 1-2:')
+						fixedVal = fixedVal.replace('Bypass: XLR AES/EBU Stereo 3-4', 'Bypass XLR AES/EBU Stereo 3-4:')
 						fixedVal = fixedVal.replace('Routing: XLR AES/EBU Quad SDI Quad', 'Routing XLR AES/EBU Quad SDI Quad:')
 						fixedVal = fixedVal.replace('Assign: HDMI Oct SDI Oct', 'Assign HDMI Oct SDI Oct:')
 						fixedVal = fixedVal.replace('Routing: HDMI Oct SDI Oct', 'Routing HDMI Oct SDI Oct:')

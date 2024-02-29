@@ -93,6 +93,56 @@ module.exports = {
 					],
 					variables: [{ name: 'Digital Input' }],
 				},
+				up_conversion_mode: {
+					variables: [{ name: 'Up conversion mode' }],
+				},
+				frame_rate_conversion: {
+					variables: [{ name: 'Frame rate conversion' }],
+				},
+				multiplex_level: {
+					variables: [{ name: 'Multiplex level' }],
+				},
+			},
+			audio_input: {
+				sample_rate_conversion: {
+					variables: [{ name: 'Sample rate conversion' }],
+				},
+				swap_channels_3_and_4: {
+					variables: [{ name: 'Swap channels 3 and 4' }],
+				},
+				xlr_format: {
+					variables: [{ name: 'XLR Format' }],
+				},
+				timecode_enabled: {
+					variables: [{ name: 'Timecode enabled' }],
+				},
+				gain_xlr_analog_left: {
+					variables: [{ name: 'Gain XLR Analog Left' }],
+				},
+				gain_xlr_analog_right: {
+					variables: [{ name: 'Gain XLR Analog Right' }],
+				},
+				assign_xlr_analog_stereo_sdi_stereo: {
+					variables: [{ name: 'Assign XLR Analog Stereo SDI Stereo' }],
+				},
+				bypass_xlr_analog_left: {
+					variables: [{ name: 'Bypass XLR Analog Left' }],
+				},
+				bypass_xlr_analog_right: {
+					variables: [{ name: 'Bypass XLR Analog Right' }],
+				},
+				gain_xlr_aes_ebu_stereo_1_2: {
+					variables: [{ name: 'Gain XLR AES/EBU Stereo 1-2' }],
+				},
+				gain_xlr_aes_ebu_stereo_3_4: {
+					variables: [{ name: 'Gain XLR AES/EBU Stereo 3-4' }],
+				},
+				assign_xlr_aes_ebu_quad_sdi_quad: {
+					variables: [{ name: 'Assign XLR AES/EBU Quad SDI Quad' }],
+				},
+				assign_hdmi_oct_sdi_oct: {
+					variables: [{ name: 'Assign HDMI Oct SDI Oct' }],
+				},
 			},
 			audio_output: {
 				xlr_format: {
